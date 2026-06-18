@@ -1,85 +1,80 @@
 #include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include<chrono>
+#include <cmath>
+#include <chrono>
 using namespace std;
 using namespace chrono;
 
-void bubble(int arr[], int n)
-{
-    for(int i = 0; i < n - 1; i++){
-        for(int j = 0; j < n - i - 1; j++){
-            if(arr[j] > arr[j + 1]){
-                swap(arr[j], arr[j + 1]);
-            }
-        }
-    }
-}
-
-void insertion(int arr[], int n)
-{
-    for(int i = 1; i < n; i++){
-        int key = arr[i];
-        int j = i - 1;
-        while(j >= 0 && arr[j] > key){
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
-}
-
-void quick(int arr[], int left, int right)
-{
-    if(left >= right){
+// -----------------------------
+// Recursive version
+// -----------------------------
+void hanoiRecursive(int n, char source, char auxiliary, char destination) {
+    if (n == 1) {
+        cout << "Move disk 1 from " << source << " to " << destination << endl;
         return;
     }
-    int pivot = arr[right];
-    int i = left - 1;
-    for(int j = left; j < right; j++){
-        if(arr[j] < pivot){
-            i++;
-            swap(arr[i], arr[j]);
-        }
-    }
-    swap(arr[i + 1], arr[right]);
-    int pi = i + 1;
-    
-    quick(arr, left, pi - 1);
-    quick(arr, pi + 1, right);
+
+    hanoiRecursive(n - 1, source, destination, auxiliary);
+    cout << "Move disk " << n << " from " << source << " to " << destination << endl;
+    hanoiRecursive(n - 1, auxiliary, source, destination);
 }
 
+// -----------------------------
+// Helper function for iterative moves
+// -----------------------------
+void moveDisk(char fromRod, char toRod, int &fromTop, int &toTop) {
+    cout << "Move disk " << fromTop << " from " << fromRod << " to " << toRod << endl;
+    toTop = fromTop;
+    fromTop = 0;
+}
 
-int main()
-{
-    int n;
-    cout << "How many grades do you have? ";
-    cin >> n;
-    int arr[n];
-    for(int i = 0; i < n; i++){
-        arr[i] = rand() % 101;
+// -----------------------------
+// Iterative version
+// -----------------------------
+void hanoiIterative(int n, char source, char auxiliary, char destination) {
+    int totalMoves = pow(2, n) - 1;
+
+    char src = source, aux = auxiliary, dest = destination;
+
+
+    if (n % 2 == 0) {
+        swap(aux, dest);
     }
-    //bubble time
+
+    for (int i = 1; i <= totalMoves; i++) {
+        if (i % 3 == 1) {
+            cout << "Step " << i << ": Move between " << src << " and " << dest << endl;
+        } else if (i % 3 == 2) {
+            cout << "Step " << i << ": Move between " << src << " and " << aux << endl;
+        } else {
+            cout << "Step " << i << ": Move between " << aux << " and " << dest << endl;
+        }
+    }
+}
+
+// -----------------------------
+// Main
+// -----------------------------
+int main() {
+    int n;
+
+    cout << "Enter number of disks: ";
+    cin >> n;
+
+    cout << "\n--- Recursive Solution ---\n";
     auto start = steady_clock::now();
-    bubble(arr, n);
+    hanoiRecursive(n, 'A', 'B', 'C');
     auto endd = steady_clock::now();
     auto time = duration_cast<microseconds>(endd - start).count();
-    cout << "Bubble sort time : " << time << " ms. " << endl;
-    cout << "-------------------------------------------------" << endl;
-    //insertion time
-    auto start2 = steady_clock::now();
-    insertion(arr, n);
-    auto endd2= steady_clock::now();
-    auto time2 = duration_cast<microseconds>(endd2 - start2).count();
-    cout << "Insertion sort time : " << time2 << " ms. " << endl;
-    cout << "--------------------------------------------------" << endl;
-    //quick time
-    auto start3 = steady_clock::now();
-    quick(arr, 0, n - 1);
-    auto endd3 = steady_clock::now();
-    auto time3 = duration_cast<microseconds>(endd3 - start3).count();
-    cout << "Quick sort time : " << time3 << " ms. " << endl;
+    cout << "Recursive solution time : " << time << " ms. " << endl;
 
+    cout << "\n--- Iterative Solution ---\n";
+    auto start2 = steady_clock::now();
+    hanoiIterative(n, 'A', 'B', 'C');
+    auto endd2 = steady_clock::now();
+    auto time2 = duration_cast<microseconds>(endd2 - start2).count();
+    cout << "Iterative solution time : " << time2 << " ms. " << endl;
+
+    cout << "\nTotal moves required: " << pow(2, n) - 1 << endl;
 
     return 0;
 }
